@@ -1,4 +1,7 @@
 const choices = ["rock", "paper", "scissors"];
+const choiceRock = 0;
+const choicePaper = 1;
+const choiceScissors = 2;
 const resultLose = 0;
 const resultDraw = 1;
 const resultWin = 2;
@@ -7,28 +10,57 @@ const matches = [
   [resultLose, resultDraw, resultWin],
   [resultWin, resultLose, resultDraw]
 ];
+const maxScore = 5;
 
 let computerScore = 0;
 let humanScore = 0;
+let isGameFinished = false;
 
-function playGame() {
-  const nRounds = 5;
-  for (let i = 0; i < nRounds; i++) {
-    playRound(getComputerChoice(), getHumanChoice());
-  }
+const textHumanScore = document.querySelector("#human-score");
+const textComputerScore = document.querySelector("#computer-score");
+const textResult = document.querySelector("#result");
+const textFinish = document.querySelector("#finish");
 
-  if (computerScore > humanScore) {
-    console.log(`You lose this game ${humanScore} to ${computerScore}, better luck next time!`);
-  } else if (computerScore < humanScore) {
-    console.log(`You win this game ${humanScore} to ${computerScore}, congratulations!`);
-  } else {
-    console.log("This game is a draw!");
-  }
+document.addEventListener('DOMContentLoaded', () => {
+  textResult.textContent = "Press a button to start";
+  updateTextScores();
+})
+
+function updateTextScores() {
+  textHumanScore.textContent = `Player score: ${humanScore}`;
+  textComputerScore.textContent = `Computer score: ${computerScore}`;
 }
+
+const buttons = document.querySelector(".buttons");
+buttons.addEventListener("click", (event) => {
+  if (isGameFinished) {
+    computerScore = 0;
+    humanScore = 0;
+    textFinish.textContent = "";
+    isGameFinished = false;
+  }
+
+  let target = event.target;
+  let humanChoice = null;
+
+  switch(target.id) {
+    case "rock":
+      humanChoice = choiceRock;
+      break;
+    case "paper":
+      humanChoice = choicePaper;
+      break;
+    case "scissors":
+      humanChoice = choiceScissors;
+      break;
+  }
+
+  playRound(getComputerChoice(), humanChoice);
+});
 
 function playRound(computerChoice, humanChoice) {
   if ((computerChoice === null) || (humanChoice === null)) {
-    console.log("Invalid choices!");
+    textResult.textContent = "Invalid choices!";
     return;
   }
 
@@ -37,15 +69,21 @@ function playRound(computerChoice, humanChoice) {
   switch (match) {
     case resultLose:
       computerScore++;
-      console.log(`You lose this round, ${choices[computerChoice]} beats ${choices[humanChoice]}!`);
+      textResult.textContent = `You lose this round, ${choices[computerChoice]} beats ${choices[humanChoice]}!`;
       break;
     case resultDraw:
-      console.log("That's a draw for this round!");
+      textResult.textContent = "That's a draw for this round!";
       break;
     case resultWin:
       humanScore++;
-      console.log(`You win this round, ${choices[humanChoice]} beats ${choices[computerChoice]}!`);
+      textResult.textContent = `You win this round, ${choices[humanChoice]} beats ${choices[computerChoice]}!`;
       break;
+  }
+
+  updateTextScores();
+
+  if (humanScore === maxScore || computerScore === maxScore) {
+    finishGame();
   }
 }
 
@@ -54,14 +92,12 @@ function getComputerChoice() {
   return Math.floor(Math.random() * nChoices);
 }
 
-function getHumanChoice() {
-  let choice = prompt("Enter your choice (rock, paper, scissors)");
-  switch (choice.toLowerCase()) {
-    case "rock": return 0;
-    case "paper": return 1;
-    case "scissors": return 2;
-    default: return null;
+function finishGame() {
+  if (computerScore > humanScore) {
+    textFinish.textContent = `\nYou lose this game ${humanScore} to ${computerScore}, better luck next time!`;
+  } else {
+    textFinish.textContent = `\nYou win this game ${humanScore} to ${computerScore}, congratulations!`;
   }
-}
 
-playGame();
+  isGameFinished = true;
+}
